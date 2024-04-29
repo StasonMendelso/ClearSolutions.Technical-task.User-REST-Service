@@ -2,6 +2,7 @@ package com.stanislav.hlova.userrestservice.validator;
 
 import com.stanislav.hlova.userrestservice.dto.RegisterUserDto;
 import com.stanislav.hlova.userrestservice.service.UserService;
+import com.stanislav.hlova.userrestservice.validator.impl.RegisterUserDtoValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

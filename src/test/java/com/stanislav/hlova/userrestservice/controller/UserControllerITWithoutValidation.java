@@ -1,11 +1,14 @@
 package com.stanislav.hlova.userrestservice.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stanislav.hlova.userrestservice.dto.ReadUserDto;
 import com.stanislav.hlova.userrestservice.dto.RegisterUserDto;
+import com.stanislav.hlova.userrestservice.dto.UserBirthdateRangeQuery;
 import com.stanislav.hlova.userrestservice.exception.UserNotFoundException;
 import com.stanislav.hlova.userrestservice.model.User;
 import com.stanislav.hlova.userrestservice.service.UserService;
 import com.stanislav.hlova.userrestservice.util.UriUtil;
-import com.stanislav.hlova.userrestservice.validator.RegisterUserDtoValidator;
+import com.stanislav.hlova.userrestservice.validator.impl.UserGenericValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,13 +23,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
@@ -35,10 +38,12 @@ class UserControllerITWithoutValidation {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
     @MockBean
     private UserService userService;
     @MockBean
-    private RegisterUserDtoValidator registerUserDtoValidator;
+    private UserGenericValidator userGenericValidator;
     @MockBean
     private LocalValidatorFactoryBean validator; //disable @Valid in controller methods
     @MockBean
@@ -48,7 +53,8 @@ class UserControllerITWithoutValidation {
 
     @BeforeEach
     void setUp() {
-        when(registerUserDtoValidator.supports(RegisterUserDto.class)).thenCallRealMethod();
+        when(userGenericValidator.supports(RegisterUserDto.class)).thenReturn(true);
+        when(userGenericValidator.supports(UserBirthdateRangeQuery.class)).thenReturn(true);
     }
 
     @Test
@@ -108,8 +114,36 @@ class UserControllerITWithoutValidation {
     }
 
     @Test
-    void shouldReturnBadRequest_whenUserWithPassedIdExist() throws Exception {
+    void shouldReturnOkAndDeleteUser_whenUserWithPassedIdExist() throws Exception {
         mockMvc.perform(delete("/api/v1/users/1"))
                 .andExpect(status().isOk());
+
+        verify(userService, times(1)).deleteById(1L);
     }
+
+    @Test
+    void shouldReturnEmptyList_whenNoUserInRange() throws Exception {
+        mockMvc.perform(get("/api/v1/users")
+                        .param("birthdateFrom", LocalDate.of(2000, 1, 1).toString())
+                        .param("birthdateTo", LocalDate.of(2020, 1, 1).toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    void shouldReturnNotEmptyList_whenTwoUserInRange() throws Exception {
+        ReadUserDto readUserDto1 = new ReadUserDto(1L, "stub1", "stub1", "stub1", LocalDate.parse("2010-02-02"), null, null);
+        ReadUserDto readUserDto2 = new ReadUserDto(2L, "stub2", "stub2", "stub2", LocalDate.parse("2015-12-02"), "stub2", null);
+        List<ReadUserDto> readUserDtoList = List.of(readUserDto1, readUserDto2);
+        when(userService.findInBirthdateRange(any(UserBirthdateRangeQuery.class))).thenReturn(readUserDtoList);
+
+        mockMvc.perform(get("/api/v1/users")
+                        .param("birthdateFrom", LocalDate.of(2000, 1, 1).toString())
+                        .param("birthdateTo", LocalDate.of(2020, 1, 1).toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(readUserDtoList)));
+    }
+
 }

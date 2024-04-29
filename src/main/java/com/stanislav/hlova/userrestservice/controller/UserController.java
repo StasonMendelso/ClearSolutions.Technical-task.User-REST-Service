@@ -1,10 +1,12 @@
 package com.stanislav.hlova.userrestservice.controller;
 
+import com.stanislav.hlova.userrestservice.dto.ReadUserDto;
 import com.stanislav.hlova.userrestservice.dto.RegisterUserDto;
+import com.stanislav.hlova.userrestservice.dto.UserBirthdateRangeQuery;
 import com.stanislav.hlova.userrestservice.model.User;
 import com.stanislav.hlova.userrestservice.service.UserService;
 import com.stanislav.hlova.userrestservice.util.UriUtil;
-import com.stanislav.hlova.userrestservice.validator.RegisterUserDtoValidator;
+import com.stanislav.hlova.userrestservice.validator.impl.UserGenericValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -19,11 +22,11 @@ import java.net.URI;
 public class UserController {
     private final UserService userService;
     private final UriUtil uriUtil;
-    private final RegisterUserDtoValidator registerUserDtoValidator;
+    private final UserGenericValidator userGenericValidator;
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
-        binder.addValidators(registerUserDtoValidator);
+        binder.addValidators(userGenericValidator);
     }
 
     @PostMapping
@@ -39,5 +42,11 @@ public class UserController {
     public ResponseEntity<?> delete(@PathVariable(name = "id") Long userId) {
         userService.deleteById(userId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ReadUserDto>> getUserInBirthdateRange(@Valid UserBirthdateRangeQuery userBirthdateRangeQuery) {
+        List<ReadUserDto> userDtoList = userService.findInBirthdateRange(userBirthdateRangeQuery);
+        return ResponseEntity.ok(userDtoList);
     }
 }

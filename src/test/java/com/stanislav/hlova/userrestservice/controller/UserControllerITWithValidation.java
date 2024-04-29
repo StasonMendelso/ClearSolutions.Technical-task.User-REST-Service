@@ -3,17 +3,22 @@ package com.stanislav.hlova.userrestservice.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.stanislav.hlova.userrestservice.config.ValidatorConfig;
+import com.stanislav.hlova.userrestservice.dto.ReadUserDto;
 import com.stanislav.hlova.userrestservice.dto.RegisterUserDto;
+import com.stanislav.hlova.userrestservice.dto.UserBirthdateRangeQuery;
 import com.stanislav.hlova.userrestservice.model.User;
 import com.stanislav.hlova.userrestservice.service.UserService;
 import com.stanislav.hlova.userrestservice.util.UriUtil;
-import com.stanislav.hlova.userrestservice.validator.RegisterUserDtoValidator;
+import com.stanislav.hlova.userrestservice.validator.impl.RegisterUserDtoValidator;
+import com.stanislav.hlova.userrestservice.validator.impl.UserBirthdateRangeQueryValidator;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.skyscreamer.jsonassert.JSONCompare;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -31,18 +36,22 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.stream.Stream;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest({UserController.class, RegisterUserDtoValidator.class})
+@WebMvcTest(value = {UserController.class, RegisterUserDtoValidator.class, UserBirthdateRangeQueryValidator.class, ValidatorConfig.class})
 class UserControllerITWithValidation {
 
     @Autowired
@@ -69,6 +78,7 @@ class UserControllerITWithValidation {
     private static final String REQUEST_WITH_FUTURE_BIRTHDATE = "/userController/jsons/requests/requestWithBirthdateInFuture.json";
     private static final String REQUEST_WITH_UNEXPECTED_CODE = "/userController/jsons/requests/requestWithUnexpectedCode.json";
     private static final String REQUEST_WITH_VALID_VALUES = "/userController/jsons/requests/requestWithValidValues.json";
+    private static final String REQUEST_WITH_VALID_VALUES_WITHOUT_OPTIONAL_FIELDS = "/userController/jsons/requests/requestWithValidValuesWithouOptionalFields.json";
 
 
     @ParameterizedTest
@@ -107,9 +117,10 @@ class UserControllerITWithValidation {
         assertEqualIgnoringTimestamp(expectedValidationResponse, actualResponse);
     }
 
-    @Test
-    void shouldReturnCreated_whenPassedValidValues() throws Exception {
-        String requestBody = readFile(REQUEST_WITH_VALID_VALUES);
+    @ParameterizedTest
+    @ValueSource(strings = {REQUEST_WITH_VALID_VALUES, REQUEST_WITH_VALID_VALUES_WITHOUT_OPTIONAL_FIELDS})
+    void shouldReturnCreated_whenPassedValidValues(String filePath) throws Exception {
+        String requestBody = readFile(filePath);
         URI expectedLocation = new URI("/api/v1/users/1");
         when(userService.register(any(RegisterUserDto.class))).thenReturn(user);
         when(user.getId()).thenReturn(1L);
@@ -136,6 +147,45 @@ class UserControllerITWithValidation {
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
         assertEqualIgnoringTimestamp(expectedValidationResponse, actualResponse);
+    }
+
+    @Test
+    void shouldReturnBadRequest_whenNotPassParams() throws Exception {
+        mockMvc.perform(get("/api/v1/users"))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[*].fieldName", containsInAnyOrder("birthdateFrom", "birthdateTo")))
+                .andExpect(jsonPath("$.details[0].errorMessage", equalTo("Must be presented.")))
+                .andExpect(jsonPath("$.details[1].errorMessage", equalTo("Must be presented.")))
+                .andExpect(jsonPath("$.details[0].passedValue", nullValue(null)))
+                .andExpect(jsonPath("$.details[1].passedValue", nullValue(null)));
+    }
+
+    @Test
+    void shouldReturnBadRequest_whenFromGreaterToParam() throws Exception {
+        mockMvc.perform(get("/api/v1/users")
+                        .param("birthdateFrom", LocalDate.of(2020, 1, 1).toString())
+                        .param("birthdateTo", LocalDate.of(1990, 1, 1).toString()))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[0].fieldName", equalTo("birthdateFrom")))
+                .andExpect(jsonPath("$.details[0].errorMessage", equalTo("Date must be before birthdateTo value")))
+                .andExpect(jsonPath("$.details[0].passedValue", equalTo("2020-01-01")));
+    }
+
+    @Test
+    void shouldReturnNotEmptyList_whenTwoUserInRange_andParamsAreValid() throws Exception {
+        ReadUserDto readUserDto1 = new ReadUserDto(1L, "stub1", "stub1", "stub1", LocalDate.parse("2010-02-02"), null, null);
+        ReadUserDto readUserDto2 = new ReadUserDto(2L, "stub2", "stub2", "stub2", LocalDate.parse("2015-12-02"), "stub2", null);
+        List<ReadUserDto> readUserDtoList = List.of(readUserDto1, readUserDto2);
+        when(userService.findInBirthdateRange(any(UserBirthdateRangeQuery.class))).thenReturn(readUserDtoList);
+
+        mockMvc.perform(get("/api/v1/users")
+                        .param("birthdateFrom", LocalDate.of(2000, 1, 1).toString())
+                        .param("birthdateTo", LocalDate.of(2020, 1, 1).toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(readUserDtoList)));
     }
 
     private void assertEqualIgnoringTimestamp(String expectedResponse, String actualResponse) throws Exception {

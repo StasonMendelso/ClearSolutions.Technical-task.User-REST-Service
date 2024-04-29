@@ -1,18 +1,18 @@
-package com.stanislav.hlova.userrestservice.validator;
+package com.stanislav.hlova.userrestservice.validator.impl;
 
 import com.stanislav.hlova.userrestservice.dto.RegisterUserDto;
 import com.stanislav.hlova.userrestservice.service.UserService;
+import com.stanislav.hlova.userrestservice.validator.UserValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
 
 import java.time.LocalDate;
 
 @Component
 @RequiredArgsConstructor
-public class RegisterUserDtoValidator implements Validator {
+public class RegisterUserDtoValidator implements UserValidator {
     private static final String EMAIL_FIELD_NAME = "email";
     private static final String BIRTHDATE_FIELD_NAME = "birthdate";
     private final UserService userService;
