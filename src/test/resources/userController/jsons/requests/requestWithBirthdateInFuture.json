@@ -1,0 +1,8 @@
+{
+  "firstName":"firstName",
+  "lastName": "lastName",
+  "email":"testuser@gmail.com",
+  "birthdate":"2220-04-29",
+  "address":"Test address",
+  "phone_number":"+380123456789"
+}

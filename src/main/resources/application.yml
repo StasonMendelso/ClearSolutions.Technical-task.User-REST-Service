@@ -1,1 +1,17 @@
+spring:
+  datasource:
+    driverClassName: ${DATABASE_DRIVER_CLASS:org.h2.Driver}
+    url: ${DATABASE_URL:jdbc:h2:mem:rest-users;Mode=MySQL}
+    username: ${DATABASE_USERNAME:root}
+    password: ${DATABASE_PASSWORD:root}
 
+server:
+  scheme: ${SERVER_SCHEME:http}
+  host: ${SERVER_HOST:localhost}
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: ${SERVER_APPLICATION_PATH:}
+
+user:
+  register:
+    minimal-age: ${USER_REGISTER_MINIMAL-AGE:18}
