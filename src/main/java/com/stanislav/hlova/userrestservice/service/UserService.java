@@ -5,6 +5,7 @@ import com.stanislav.hlova.userrestservice.model.User;
 
 public interface UserService {
     User register(RegisterUserDto registerUserDto);
-
     boolean existByEmail(String email);
+    void deleteById(Long userId);
+
 }

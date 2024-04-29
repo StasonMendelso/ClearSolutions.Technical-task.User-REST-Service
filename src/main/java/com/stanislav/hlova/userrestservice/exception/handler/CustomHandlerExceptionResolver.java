@@ -2,18 +2,23 @@ package com.stanislav.hlova.userrestservice.exception.handler;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.stanislav.hlova.userrestservice.exception.UserNotFoundException;
+import com.stanislav.hlova.userrestservice.exception.response.CustomErrorResponse;
 import com.stanislav.hlova.userrestservice.exception.response.MismatchErrorResponse;
 import com.stanislav.hlova.userrestservice.exception.response.ValidationErrorResponse;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -76,5 +81,18 @@ public class CustomHandlerExceptionResolver extends ResponseEntityExceptionHandl
         body.put("title", "Bad Request");
         body.put("timestamp", new Date());
         body.put("status", status.value());
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<CustomErrorResponse> handleUserNotFoundException(UserNotFoundException userNotFoundException) {
+        CustomErrorResponse errorResponse = CustomErrorResponse.builder()
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
+                .status(HttpStatus.NOT_FOUND.value())
+                .timestamp(LocalDateTime.now())
+                .message(String.format("User with id %s wasn't found", userNotFoundException.getUserId()))
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(errorResponse);
     }
 }

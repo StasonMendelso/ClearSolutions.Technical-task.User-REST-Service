@@ -1,6 +1,7 @@
 package com.stanislav.hlova.userrestservice.service.impl;
 
 import com.stanislav.hlova.userrestservice.dto.RegisterUserDto;
+import com.stanislav.hlova.userrestservice.exception.UserNotFoundException;
 import com.stanislav.hlova.userrestservice.mapper.UserMapper;
 import com.stanislav.hlova.userrestservice.model.User;
 import com.stanislav.hlova.userrestservice.repository.UserRepository;
@@ -23,5 +24,13 @@ public class UserServiceImpl implements UserService {
     public boolean existByEmail(String email) {
         return userRepository.findByEmail(email)
                 .isPresent();
+    }
+
+    @Override
+    public void deleteById(Long userId) {
+        userRepository.findById(userId)
+                .ifPresentOrElse(user -> userRepository.deleteById(userId), () -> {
+                    throw new UserNotFoundException(userId);
+                });
     }
 }
