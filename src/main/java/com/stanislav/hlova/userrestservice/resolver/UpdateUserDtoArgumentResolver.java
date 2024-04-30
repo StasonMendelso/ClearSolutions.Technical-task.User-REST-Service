@@ -2,6 +2,7 @@ package com.stanislav.hlova.userrestservice.resolver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stanislav.hlova.userrestservice.dto.UpdateUserDto;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
@@ -28,14 +29,16 @@ public class UpdateUserDtoArgumentResolver implements HandlerMethodArgumentResol
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        String requestBody = IOUtils.toString(((ServletWebRequest) webRequest).getRequest().getInputStream());
+        HttpServletRequest request = ((ServletWebRequest) webRequest).getRequest();
+        String requestBody = IOUtils.toString(request.getInputStream());
         UpdateUserDto updateUserDto;
         try {
             updateUserDto = objectMapper.readValue(requestBody, UpdateUserDto.class);
         } catch (Exception exception) {
             throw new HttpMessageNotReadableException("Can't read request body.", exception);
         }
-        String userId = ((ServletWebRequest) webRequest).getRequest().getPathInfo().split("users/")[1];
+        String path = request.getPathInfo() != null ? request.getPathInfo() : request.getServletPath();
+        String userId = path.split("users/")[1];
         updateUserDto.setId(Long.valueOf(userId));
 
         if (parameter.hasParameterAnnotation(Valid.class)) {

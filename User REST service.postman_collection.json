@@ -1,0 +1,190 @@
+{
+	"info": {
+		"_postman_id": "f5be58b5-d3af-4060-a5c6-2f885a521121",
+		"name": "User REST service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25823119"
+	},
+	"item": [
+		{
+			"name": "Register User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"thomas.johnson@example.com\",\r\n    \"firstName\": \"Thomas\",\r\n    \"lastName\": \"Johnson\",\r\n    \"birthdate\": \"1999-03-22\",\r\n    \"address\": \"492 Maple St, Newville\",\r\n    \"phoneNumber\": \"999-888-7566\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base-url}}{{api-version}}/users",
+					"host": [
+						"{{base-url}}{{api-version}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User by id",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"testuser1@gmail.com\",\r\n    \"first_name\":\"Test First Name\",\r\n    \"last_name\":\"Test Last Name\",\r\n    \"birth_date\":\"2020-04-23\",\r\n    \"address\":\"Test address\",\r\n    \"phone_number\":\"+380123456789\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base-url}}{{api-version}}/users/1",
+					"host": [
+						"{{base-url}}{{api-version}}"
+					],
+					"path": [
+						"users",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get users in birthdate range",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"testuser1@gmail.com\",\r\n    \"first_name\":\"Test First Name\",\r\n    \"last_name\":\"Test Last Name\",\r\n    \"birth_date\":\"2020-04-23\",\r\n    \"address\":\"Test address\",\r\n    \"phone_number\":\"+380123456789\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base-url}}{{api-version}}/users?birthdateFrom=1980-01-01&birthdateTo=2000-04-30",
+					"host": [
+						"{{base-url}}{{api-version}}"
+					],
+					"path": [
+						"users"
+					],
+					"query": [
+						{
+							"key": "birthdateFrom",
+							"value": "1980-01-01"
+						},
+						{
+							"key": "birthdateTo",
+							"value": "2000-04-30"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Full update User",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"testuser3@gmail.com\",\r\n    \"firstName\":\"Test First Name\",\r\n    \"lastName\":\"New\",\r\n    \"birthdate\":\"2000-04-23\",\r\n    \"address\":\"Test address\",\r\n    \"phoneNumber\":\"+380123456789\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base-url}}{{api-version}}/users/2",
+					"host": [
+						"{{base-url}}{{api-version}}"
+					],
+					"path": [
+						"users",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Patch update User",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"testuser10@gmail.com\",\r\n    \"birthdate\": \"1999-12-15\",\r\n    \"address\": null\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base-url}}{{api-version}}/users/1",
+					"host": [
+						"{{base-url}}{{api-version}}"
+					],
+					"path": [
+						"users",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base-url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "api-version",
+			"value": "/api/v1",
+			"type": "string"
+		}
+	]
+}

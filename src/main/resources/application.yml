@@ -4,7 +4,10 @@ spring:
     url: ${DATABASE_URL:jdbc:h2:mem:rest-users;Mode=MySQL}
     username: ${DATABASE_USERNAME:root}
     password: ${DATABASE_PASSWORD:root}
-
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: none
 server:
   scheme: ${SERVER_SCHEME:http}
   host: ${SERVER_HOST:localhost}
