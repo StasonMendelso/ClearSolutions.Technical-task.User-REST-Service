@@ -1,0 +1,11 @@
+{
+  "path": "/api/v1/users/1",
+  "method" : "PATCH",
+  "title": "Bad Request",
+  "timestamp": "2024-04-29T14:08:23.769+00:00",
+  "status": 400,
+  "detail" : {
+    "errorMessage" : "Invalid format or type of passed value. Check type, value and format.",
+    "passedValue" : "2002-04-294214"
+  }
+}

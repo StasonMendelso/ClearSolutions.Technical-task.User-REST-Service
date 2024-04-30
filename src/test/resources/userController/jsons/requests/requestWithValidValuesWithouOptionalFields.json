@@ -2,7 +2,5 @@
   "firstName":"firstName",
   "lastName": "lastName",
   "email":"testuser@gmail.com",
-  "birthdate":"1972-04-29",
-  "address":"Test address",
-  "phoneNumber":"+380123456789"
+  "birthdate":"1972-04-29"
 }

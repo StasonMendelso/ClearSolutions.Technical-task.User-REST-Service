@@ -10,7 +10,9 @@ import java.util.List;
 
 public interface UserService {
     User register(RegisterUserDto registerUserDto);
+
     boolean existByEmail(String email);
+
     void deleteById(Long userId);
 
     List<ReadUserDto> findInBirthdateRange(UserBirthdateRangeQuery userBirthdateRangeQuery);
@@ -18,4 +20,6 @@ public interface UserService {
     ReadUserDto update(Long userId, UpdateUserDto updateUserDto);
 
     boolean userEmailMatch(Long userId, String email);
+
+    User readById(Long userId);
 }

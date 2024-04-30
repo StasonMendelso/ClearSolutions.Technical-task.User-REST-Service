@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan(basePackages = "com.stanislav.hlova.userrestservice.validator")
-public class ValidatorConfig {
+public class ValidatorConfiguration {
     @Bean
     public UserGenericValidator userGenericValidator(RegisterUserValidator registerUserDtoValidator,
                                                      UserBirthdateRangeQueryValidator userBirthdateRangeQueryValidator,

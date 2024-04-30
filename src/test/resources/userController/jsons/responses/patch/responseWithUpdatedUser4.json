@@ -1,0 +1,9 @@
+{
+  "id": 1,
+  "firstName": "firstName",
+  "lastName": "lastName",
+  "email": "testuser@gmail.com",
+  "birthdate": "1972-04-29",
+  "address": null,
+  "phoneNumber": null
+}

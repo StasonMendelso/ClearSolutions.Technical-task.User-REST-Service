@@ -11,4 +11,5 @@ public interface UserMapper {
     User toEntity(RegisterUserDto registerUserDto);
     User toEntity(UpdateUserDto updateUserDto);
     ReadUserDto toReadDto(User user);
+    UpdateUserDto toUpdateDto(User user);
 }

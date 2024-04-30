@@ -1,0 +1,9 @@
+{
+  "id": 1,
+  "firstName": "newFirstName",
+  "lastName": "lastName",
+  "email": "testuser3022@gmail.com",
+  "birthdate": "1972-04-29",
+  "address": "Test address",
+  "phoneNumber": "+380123456789"
+}

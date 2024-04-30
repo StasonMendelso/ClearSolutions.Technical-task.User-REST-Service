@@ -6,6 +6,7 @@ import com.stanislav.hlova.userrestservice.exception.UserNotFoundException;
 import com.stanislav.hlova.userrestservice.exception.response.CustomErrorResponse;
 import com.stanislav.hlova.userrestservice.exception.response.MismatchErrorResponse;
 import com.stanislav.hlova.userrestservice.exception.response.ValidationErrorResponse;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -26,6 +27,8 @@ import java.util.Map;
 
 @ControllerAdvice
 public class CustomHandlerExceptionResolver extends ResponseEntityExceptionHandler {
+
+    public static final String DETAIL = "detail";
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
@@ -52,7 +55,7 @@ public class CustomHandlerExceptionResolver extends ResponseEntityExceptionHandl
         if (exception.getCause() instanceof InvalidFormatException invalidFormatException) {
             Map<String, Object> body = new LinkedHashMap<>();
             setCommonFields(status, (ServletWebRequest) request, body);
-            body.put("detail", ValidationErrorResponse.builder()
+            body.put(DETAIL, ValidationErrorResponse.builder()
                     .fieldName(invalidFormatException.getPath().get(0).getFieldName()) //can be only one error at a time
                     .errorMessage("Invalid format or type of passed value. Check type, value and format.")
                     .passedValue(invalidFormatException.getValue())
@@ -64,13 +67,23 @@ public class CustomHandlerExceptionResolver extends ResponseEntityExceptionHandl
             Map<String, Object> body = new LinkedHashMap<>();
             setCommonFields(status, (ServletWebRequest) request, body);
             if (!mismatchedInputException.getPath().isEmpty()) {
-                body.put("detail", MismatchErrorResponse.builder()
+                body.put(DETAIL, MismatchErrorResponse.builder()
                         .fieldName(mismatchedInputException.getPath().get(0).getFieldName()) //can be only one error at a time
                         .errorMessage("Invalid type of passed value. Check type and format.")
                         .build());
 
                 return new ResponseEntity<>(body, headers, status);
             }
+        }
+        if (exception.getCause() instanceof ConversionFailedException conversionFailedException) {
+            Map<String, Object> body = new LinkedHashMap<>();
+            setCommonFields(status, (ServletWebRequest) request, body);
+            body.put(DETAIL, ValidationErrorResponse.builder()
+                    .errorMessage("Invalid format or type of passed value. Check type, value and format.")
+                    .passedValue(conversionFailedException.getValue())
+                    .build());
+
+            return new ResponseEntity<>(body, headers, status);
         }
         logger.warn("Unknown exception occurred in HttpMessageNotReadableException", exception);
         return super.handleHttpMessageNotReadable(exception, headers, status, request);

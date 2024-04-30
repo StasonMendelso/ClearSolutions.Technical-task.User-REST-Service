@@ -68,4 +68,10 @@ public class UserServiceImpl implements UserService {
                 .map(user -> user.getEmail().equals(email))
                 .orElseThrow(() -> new UserNotFoundException(userId));
     }
+
+    @Override
+    public User readById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+    }
 }

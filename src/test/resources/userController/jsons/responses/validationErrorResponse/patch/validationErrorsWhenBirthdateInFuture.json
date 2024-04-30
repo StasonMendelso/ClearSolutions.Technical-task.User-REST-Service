@@ -1,0 +1,14 @@
+{
+  "path": "/api/v1/users/1",
+  "method" : "PATCH",
+  "title": "Bad Request",
+  "timestamp": "2024-04-29T15:37:18.826+00:00",
+  "status": 400,
+  "details": [
+    {
+      "fieldName": "birthdate",
+      "errorMessage": "Birthdate must be earlier than current date.",
+      "passedValue": "2220-04-29"
+    }
+  ]
+}

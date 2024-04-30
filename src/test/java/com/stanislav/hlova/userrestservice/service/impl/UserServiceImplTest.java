@@ -108,4 +108,20 @@ class UserServiceImplTest {
         verify(newUser, times(1)).setId(userId);
         verify(userRepository, times(1)).save(newUser);
     }
+
+    @Test
+    void shouldReturnUser_whenUserExists() {
+        Long userId = 1L;
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        assertEquals(user, userService.readById(userId));
+    }
+
+    @Test
+    void shouldThrowException_whenUserNotExists() {
+        Long userId = 1L;
+
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> userService.readById(userId));
+        assertEquals(userId, exception.getUserId());
+    }
 }

@@ -1,0 +1,34 @@
+{
+  "path": "/api/v1/users/1",
+  "method" : "PATCH",
+  "title": "Bad Request",
+  "timestamp": "2024-04-29T14:08:23.769+00:00",
+  "status": 400,
+  "details": [
+    {
+      "fieldName": "email",
+      "errorMessage": "Email must be presented.",
+      "passedValue": null
+    },
+    {
+      "fieldName": "firstName",
+      "errorMessage": "First name must be presented.",
+      "passedValue": null
+    },
+    {
+      "fieldName": "lastName",
+      "errorMessage": "Last name must be presented.",
+      "passedValue": null
+    },
+    {
+      "fieldName": "birthdate",
+      "errorMessage": "Birthdate must be presented.",
+      "passedValue": null
+    },
+    {
+      "fieldName": "birthdate",
+      "errorMessage": "You age must be more than 5",
+      "passedValue": null
+    }
+  ]
+}
