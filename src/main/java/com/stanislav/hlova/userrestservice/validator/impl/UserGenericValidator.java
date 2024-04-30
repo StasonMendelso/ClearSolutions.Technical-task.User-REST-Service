@@ -2,11 +2,10 @@ package com.stanislav.hlova.userrestservice.validator.impl;
 
 import com.stanislav.hlova.userrestservice.validator.UserValidator;
 import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
 
 import java.util.List;
 
-public class UserGenericValidator implements Validator {
+public class UserGenericValidator implements UserValidator {
 
     private final List<UserValidator> validatorList;
 

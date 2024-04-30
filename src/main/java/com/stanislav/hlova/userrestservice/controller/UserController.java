@@ -2,6 +2,7 @@ package com.stanislav.hlova.userrestservice.controller;
 
 import com.stanislav.hlova.userrestservice.dto.ReadUserDto;
 import com.stanislav.hlova.userrestservice.dto.RegisterUserDto;
+import com.stanislav.hlova.userrestservice.dto.UpdateUserDto;
 import com.stanislav.hlova.userrestservice.dto.UserBirthdateRangeQuery;
 import com.stanislav.hlova.userrestservice.model.User;
 import com.stanislav.hlova.userrestservice.service.UserService;
@@ -9,6 +10,7 @@ import com.stanislav.hlova.userrestservice.util.UriUtil;
 import com.stanislav.hlova.userrestservice.validator.impl.UserGenericValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -49,4 +51,12 @@ public class UserController {
         List<ReadUserDto> userDtoList = userService.findInBirthdateRange(userBirthdateRangeQuery);
         return ResponseEntity.ok(userDtoList);
     }
+
+    @PutMapping(value = "{id}", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<ReadUserDto> update(@PathVariable(name = "id") Long userId, @Valid UpdateUserDto updateUserDto) {
+        ReadUserDto updatedUser = userService.update(userId, updateUserDto);
+
+        return ResponseEntity.ok(updatedUser);
+    }
 }
+

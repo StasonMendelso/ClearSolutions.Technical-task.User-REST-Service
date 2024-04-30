@@ -2,6 +2,7 @@ package com.stanislav.hlova.userrestservice.service.impl;
 
 import com.stanislav.hlova.userrestservice.dto.ReadUserDto;
 import com.stanislav.hlova.userrestservice.dto.RegisterUserDto;
+import com.stanislav.hlova.userrestservice.dto.UpdateUserDto;
 import com.stanislav.hlova.userrestservice.dto.UserBirthdateRangeQuery;
 import com.stanislav.hlova.userrestservice.exception.UserNotFoundException;
 import com.stanislav.hlova.userrestservice.mapper.UserMapper;
@@ -45,5 +46,26 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(userMapper::toReadDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public ReadUserDto update(Long userId, UpdateUserDto updateUserDto) {
+        User newUser = userMapper.toEntity(updateUserDto);
+        newUser.setId(userId);
+        userRepository.findById(userId)
+                .ifPresentOrElse(user -> userRepository.save(newUser), () -> {
+                    throw new UserNotFoundException(userId);
+                });
+
+        return userRepository.findById(userId)
+                .map(userMapper::toReadDto)
+                .get();
+    }
+
+    @Override
+    public boolean userEmailMatch(Long userId, String email) {
+        return userRepository.findById(userId)
+                .map(user -> user.getEmail().equals(email))
+                .orElseThrow(() -> new UserNotFoundException(userId));
     }
 }

@@ -1,5 +1,6 @@
 {
   "path": "/api/v1/users",
+  "method" : "POST",
   "title": "Bad Request",
   "timestamp": "2024-04-29T14:08:23.769+00:00",
   "status": 400,

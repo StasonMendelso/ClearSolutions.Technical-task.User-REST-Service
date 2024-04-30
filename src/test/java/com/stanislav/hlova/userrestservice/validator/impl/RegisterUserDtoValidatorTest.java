@@ -1,8 +1,7 @@
-package com.stanislav.hlova.userrestservice.validator;
+package com.stanislav.hlova.userrestservice.validator.impl;
 
 import com.stanislav.hlova.userrestservice.dto.RegisterUserDto;
 import com.stanislav.hlova.userrestservice.service.UserService;
-import com.stanislav.hlova.userrestservice.validator.impl.RegisterUserDtoValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +23,7 @@ class RegisterUserDtoValidatorTest {
     public static final String USER_WITH_PASSED_EMAIL_ALREADY_EXISTS = "User with passed email already exists";
     public static final String YOU_AGE_MUST_BE_MORE_THAN_5 = "You age must be more than 5";
     @InjectMocks
-    private RegisterUserDtoValidator validator;
+    private RegisterUserValidator validator;
     @Mock
     private UserService userService;
     @Mock

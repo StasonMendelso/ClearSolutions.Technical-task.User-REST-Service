@@ -1,6 +1,7 @@
 package com.stanislav.hlova.userrestservice.config;
 
-import com.stanislav.hlova.userrestservice.validator.impl.RegisterUserDtoValidator;
+import com.stanislav.hlova.userrestservice.validator.impl.RegisterUserValidator;
+import com.stanislav.hlova.userrestservice.validator.impl.UpdateUserValidator;
 import com.stanislav.hlova.userrestservice.validator.impl.UserBirthdateRangeQueryValidator;
 import com.stanislav.hlova.userrestservice.validator.impl.UserGenericValidator;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +12,9 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackages = "com.stanislav.hlova.userrestservice.validator")
 public class ValidatorConfig {
     @Bean
-    public UserGenericValidator userGenericValidator(RegisterUserDtoValidator registerUserDtoValidator, UserBirthdateRangeQueryValidator userBirthdateRangeQueryValidator) {
-        return new UserGenericValidator(registerUserDtoValidator, userBirthdateRangeQueryValidator);
+    public UserGenericValidator userGenericValidator(RegisterUserValidator registerUserDtoValidator,
+                                                     UserBirthdateRangeQueryValidator userBirthdateRangeQueryValidator,
+                                                     UpdateUserValidator updateUserValidator) {
+        return new UserGenericValidator(registerUserDtoValidator, userBirthdateRangeQueryValidator, updateUserValidator);
     }
 }

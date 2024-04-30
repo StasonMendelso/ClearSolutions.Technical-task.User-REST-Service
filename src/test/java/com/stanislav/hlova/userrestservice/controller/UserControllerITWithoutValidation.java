@@ -3,6 +3,7 @@ package com.stanislav.hlova.userrestservice.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stanislav.hlova.userrestservice.dto.ReadUserDto;
 import com.stanislav.hlova.userrestservice.dto.RegisterUserDto;
+import com.stanislav.hlova.userrestservice.dto.UpdateUserDto;
 import com.stanislav.hlova.userrestservice.dto.UserBirthdateRangeQuery;
 import com.stanislav.hlova.userrestservice.exception.UserNotFoundException;
 import com.stanislav.hlova.userrestservice.model.User;
@@ -55,6 +56,7 @@ class UserControllerITWithoutValidation {
     void setUp() {
         when(userGenericValidator.supports(RegisterUserDto.class)).thenReturn(true);
         when(userGenericValidator.supports(UserBirthdateRangeQuery.class)).thenReturn(true);
+        when(userGenericValidator.supports(UpdateUserDto.class)).thenReturn(true);
     }
 
     @Test
@@ -95,13 +97,13 @@ class UserControllerITWithoutValidation {
     }
 
     @Test
-    void shouldReturnBadRequest_whenInvalidUserIdPassed() throws Exception {
+    void shouldReturnBadRequest_whenInvalidUserIdPassedForDeleting() throws Exception {
         mockMvc.perform(delete("/api/v1/users/abd"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void shouldReturnBadRequest_whenUserWithPassedIdNotExist() throws Exception {
+    void shouldReturnBadRequest_whenUserWithPassedIdNotExistForDeleting() throws Exception {
         Long userId = 1L;
         doThrow(new UserNotFoundException(userId)).when(userService).deleteById(userId);
 
@@ -114,7 +116,7 @@ class UserControllerITWithoutValidation {
     }
 
     @Test
-    void shouldReturnOkAndDeleteUser_whenUserWithPassedIdExist() throws Exception {
+    void shouldReturnOkAndDeleteUser_whenUserWithPassedIdExistForDeleting() throws Exception {
         mockMvc.perform(delete("/api/v1/users/1"))
                 .andExpect(status().isOk());
 
@@ -144,6 +146,64 @@ class UserControllerITWithoutValidation {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(readUserDtoList)));
+    }
+
+    @Test
+    void shouldReturnBadRequest_whenInvalidUserIdPassedForUpdating() throws Exception {
+        mockMvc.perform(put("/api/v1/users/abd")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequest_whenInvalidContentTypePassedForUpdating() throws Exception {
+        mockMvc.perform(put("/api/v1/users/1")
+                        .content("{}")
+                        .contentType(MediaType.APPLICATION_ATOM_XML))
+                .andExpect(status().isUnsupportedMediaType())
+                .andExpect(jsonPath("status").value(415))
+                .andExpect(jsonPath("title").value("Unsupported Media Type"))
+                .andExpect(jsonPath("detail").value("Content-Type 'application/atom+xml' is not supported."))
+                .andExpect(jsonPath("instance").value("/api/v1/users/1"));
+    }
+
+
+    @Test
+    void shouldReturnBadRequest_whenNoUserFoundForUpdating() throws Exception {
+        when(userService.update(eq(1L), any(UpdateUserDto.class))).thenThrow(new UserNotFoundException(1L));
+
+        mockMvc.perform(put("/api/v1/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("timestamp").exists())
+                .andExpect(jsonPath("status").value(404))
+                .andExpect(jsonPath("error").value("Not Found"))
+                .andExpect(jsonPath("message").value("User with id 1 wasn't found"));
+    }
+
+    @Test
+    void shouldReturnBadRequest_whenNoContentPassedForUpdating() throws Exception {
+        mockMvc.perform(put("/api/v1/users/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("status").value(400))
+                .andExpect(jsonPath("title").value("Bad Request"))
+                .andExpect(jsonPath("detail").value("Failed to read request"))
+                .andExpect(jsonPath("instance").value("/api/v1/users/1"));
+    }
+
+    @Test
+    void shouldReturnOkAndUpdatedUser_whenValidValuesPassedForUpdating() throws Exception {
+        UpdateUserDto updateUserDto = new UpdateUserDto(null, "stubEmail", "stubName", "stubName", LocalDate.now(), "stubAddress", "stubPhone");
+        ReadUserDto readUserDto = new ReadUserDto(1L, "stubEmail", "stubName", "stubName", updateUserDto.getBirthdate(), "stubAddress", "stubPhone");
+        when(userService.update(eq(1L), any(UpdateUserDto.class))).thenReturn(readUserDto);
+
+        mockMvc.perform(put("/api/v1/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateUserDto)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(objectMapper.writeValueAsString(readUserDto)));
     }
 
 }

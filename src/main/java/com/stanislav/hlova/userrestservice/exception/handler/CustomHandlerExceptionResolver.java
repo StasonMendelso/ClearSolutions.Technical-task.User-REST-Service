@@ -78,6 +78,7 @@ public class CustomHandlerExceptionResolver extends ResponseEntityExceptionHandl
 
     private void setCommonFields(HttpStatusCode status, ServletWebRequest request, Map<String, Object> body) {
         body.put("path", request.getRequest().getRequestURI());
+        body.put("method", request.getRequest().getMethod());
         body.put("title", "Bad Request");
         body.put("timestamp", new Date());
         body.put("status", status.value());
